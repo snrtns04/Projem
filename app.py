@@ -5,35 +5,45 @@ from tensorflow.keras.preprocessing import image
 import os
 from PIL import Image
 
-# Başlık
+# Sayfa Yapılandırması
+st.set_page_config(page_title="Tüberküloz Teşhis", page_icon="🦠")
 st.title("🦠 Tüberküloz Teşhis Sistemi")
 
-# Model Yükleme
+# 🤖 Model yükleme (Önbelleğe alarak hızı artırıyoruz)
 @st.cache_resource
 def load_my_model():
-    base_dir = os.path.dirname(os.path.abspath(__file__))
-    model_path = os.path.join(base_dir, "model", "tb_model.h5")
+    # Model dosyan ana dizinde olduğu için direkt adıyla çağırıyoruz
+    model_path = "tb_model.h5" 
     return tf.keras.models.load_model(model_path)
 
 try:
     model = load_my_model()
-    st.success("Model başarıyla yüklendi!")
+    st.sidebar.success("Model başarıyla yüklendi!")
 except Exception as e:
-    st.error(f"Model yüklenirken hata oluştu: {e}")
+    st.error(f"Model yüklenemedi! 'tb_model.h5' dosyasının GitHub ana dizininde olduğundan emin olun. Hata: {e}")
 
-# Dosya Yükleme
-uploaded_file = st.file_uploader("Röntgen filmi seçin...", type=["jpg", "png", "jpeg"])
+# 📂 Dosya Yükleme Alanı
+uploaded_file = st.file_uploader("Röntgen filmi seçin (JPG, PNG, JPEG)...", type=["jpg", "png", "jpeg"])
 
-if uploaded_file:
+if uploaded_file is not None:
+    # Resmi ekranda göster
     img = Image.open(uploaded_file)
     st.image(img, caption='Yüklenen Görüntü', use_container_width=True)
     
-    # Tahmin
-    img_resized = img.resize((224, 224))
-    img_array = image.img_to_array(img_resized) / 255.0
-    img_array = np.expand_dims(img_array, axis=0)
-    
-    pred = model.predict(img_array)[0][0]
-    label = "🦠 Tüberküloz Var" if pred > 0.5 else "✅ Tüberküloz Yok"
-    st.subheader(f"Sonuç: {label}")
-    st.write(f"Güven Oranı: %{round(float(pred if pred > 0.5 else 1-pred)*100, 2)}")
+    if st.button("Analiz Et"):
+        with st.spinner('Yapay zeka analiz ediyor...'):
+            # Resim ön işleme
+            img_resized = img.resize((224, 224))
+            img_array = image.img_to_array(img_resized) / 255.0
+            img_array = np.expand_dims(img_array, axis=0)
+            
+            # Tahmin
+            pred = model.predict(img_array)[0][0]
+            
+            # Sonuç gösterimi
+            if pred > 0.5:
+                st.error(f"Sonuç: 🦠 Tüberküloz Belirtisi Saptandı")
+                st.write(f"Güven Oranı: %{round(float(pred) * 100, 2)}")
+            else:
+                st.success(f"Sonuç: ✅ Sağlıklı / Belirti Saptanmadı")
+                st.write(f"Güven Oranı: %{round(float(1 - pred) * 100, 2)}")
