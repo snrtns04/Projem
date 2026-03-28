@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Tüberküloz Tespit</title>
+
+    <style>
+        body {
+            font-family: Arial;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            text-align: center;
+        }
+
+        .container {
+            margin-top: 40px;
+        }
+
+        .box {
+            background: white;
+            color: black;
+            padding: 20px;
+            margin: 20px auto;
+            border-radius: 15px;
+            width: 400px;
+        }
+
+        button {
+            padding: 10px 20px;
+            border: none;
+            background: #667eea;
+            color: white;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        img {
+            width: 300px;
+            border-radius: 10px;
+            margin-top: 10px;
+        }
+
+        .graphs img {
+            width: 250px;
+        }
+
+        a {
+            text-decoration: none;
+            color: white;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>🫁 Tüberküloz Tespit Sistemi</h1>
+
+<div class="box">
+<form method="POST" enctype="multipart/form-data">
+    <input type="file" name="file">
+    <br><br>
+    <button>Tahmin Et</button>
+</form>
+
+{% if result %}
+<h2>{{ result }}</h2>
+<h3>Güven: %{{ confidence }}</h3>
+<img src="/static/{{ img_path }}">
+{% endif %}
+</div>
+
+<h2>📊 Model Performansı</h2>
+
+<div class="graphs">
+    <img src="/static/accuracy.png">
+    <img src="/static/loss.png">
+    <img src="/static/confusion_matrix.png">
+</div>
+
+<br>
+
+<a href="/code">
+    <button>📄 Kodları Göster</button>
+</a>
+
+</div>
+
+</body>
+</html>
